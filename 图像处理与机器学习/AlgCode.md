@@ -21,3 +21,134 @@ void CMFCApplication1View::histCompute(BYTE*image, int width, int height)
 ```
 
 ![image-20240329213907268](./assets/AlgCode/image-20240329213907268.png)
+
+# 直方图均衡
+
+```C++
+void CMFCApplication1View::hisEqualiz(BYTE* image, int w, int h, BYTE* outImg)
+{
+	int his[256];
+	int n, i, j;
+	//计算图像直方图
+	for (n = 0; n < 256; n++) {
+		his[n] = 0;
+	}
+	for (i = 0; i < h; i++) {
+		for (j = 0; j < w; j++) {
+			his[image[i * w + j]] ++;
+		}
+	}
+	//计算新的灰度级
+	for (n = 1; n < 256; n++)
+		his[n] += his[n - 1];
+	BYTE gray[256];
+	float cons;
+	cons = 255.0 / his[255];
+	for (n = 0; n < 256; n++) {
+		gray[n] = (BYTE)(cons * his[n]);
+	}
+	//用新的灰度级替换原来的灰度级
+	for (i = 0; i < h; i++)
+		for (j = 0; j < w; j++)
+			outImg[i * w + j] = gray[image[i * w + j]];
+}
+```
+
+![image-20240401210042377](./assets/AlgCode/image-20240401210042377.png)
+
+# 均值滤波
+
+```C++
+
+//均值滤波
+void CMFCApplication1View::meanFilter(BYTE* image, int width, int heigth, BYTE* outImg)
+{
+	int smth[9];
+	int i, j, m, n;
+	BYTE block[9];
+
+	int value;
+	for (i = 0; i < 9; i++)
+		smth[i] = 1;
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < width; j++) {
+			if (i == 0 || j == 0 || i == height - 1 || j == width - 1)
+				outImg[i * width + j] = 0;
+			else {
+				for (m = -1; m < 2; m++)
+					for (n = -1; n < 2; n++)
+						block[(m + 1) * 3 + n + 1] = image[(i + m) * width + j + n];
+
+				value = convolution(smth, block);
+				outImg[i * width + j] = BYTE(value / 9);
+			}
+		}
+	}
+}
+
+
+int CMFCApplication1View::convolution(int* operatr, BYTE* block)
+{
+	int value;
+	int i, j;
+	value = 0;
+	//卷积运算
+	for (i = 0; i < 3; i++)
+		for (j = 0; j < 3; j++)
+			value += operatr[i * 3 + j] * block[i * 3 + j];
+	return value;
+
+}
+```
+
+![image-20240401212458927](./assets/AlgCode/image-20240401212458927.png)
+
+# 高斯滤波
+
+```C++
+int CMFCApplication1View::convolution(int* operatr, BYTE* block)
+{
+	int value;
+	int i, j;
+	value = 0;
+	//卷积运算
+	for (i = 0; i < 3; i++)
+		for (j = 0; j < 3; j++)
+			value += operatr[i * 3 + j] * block[i * 3 + j];
+	return value;
+
+}
+
+void CMFCApplication1View::gaussian(BYTE* image, int width, int heigth, BYTE* outImg)
+{
+	//高斯滤波
+	int smth[9];
+	int i, j, m, n;
+	BYTE block[9];
+
+	smth[0] = 1;smth[4] = 4;
+	smth[1] = 2;smth[5] = 2;
+	smth[2] = 1;smth[6] = 1;
+	smth[3] = 2;smth[7] = 2;
+				smth[8] = 1;
+	int value;
+	for (i = 0; i < 9; i++)
+		smth[i] = 1;
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < width; j++) {
+			if (i == 0 || j == 0 || i == height - 1 || j == width - 1)
+				outImg[i * width + j] = 0;
+			else {
+				for (m = -1; m < 2; m++)
+					for (n = -1; n < 2; n++)
+						block[(m + 1) * 3 + n + 1] = image[(i + m) * width + j + n];
+
+				value = convolution(smth, block);
+				outImg[i * width + j] = BYTE(value / 16);
+			}
+		}
+	}
+}
+```
+
+![image-20240401212523797](./assets/AlgCode/image-20240401212523797.png)
