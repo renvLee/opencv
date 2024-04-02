@@ -152,3 +152,109 @@ void CMFCApplication1View::gaussian(BYTE* image, int width, int heigth, BYTE* ou
 ```
 
 ![image-20240401212523797](./assets/AlgCode/image-20240401212523797.png)
+
+# 中值滤波
+
+```C++
+void CMFCApplication1View::midFindFiltering(BYTE* image, int width, int heigth, BYTE* outImg)
+{
+	//中值滤波
+	int i, j, m, n;
+	BYTE block[9];
+
+	int value;
+	int blockNum = 9;
+	for(i=0;i<height;i++)
+		for (j = 0; j < width; j++) {
+			if (i == 0 || j == 0 || i == width - 1 || j == height - 1)
+				outImg[i * width + j] = 0;
+			else {
+				for (m = -1; m < 2; m++)
+					for (n = -1; n < 2; n++)
+						block[(m + 1) * 3 + n + 1] = image[(i + m) * width + j + n];
+
+				value = MidValueFind(blockNum, block);
+				outImg[i * width + j] = value;
+			}
+		}
+}
+
+int CMFCApplication1View::MidValueFind(int num, BYTE* d)
+{
+	int value;
+
+	int i, j;
+	int temp;
+	for (i = 0; i < num - 1; i++)
+		for (j = i + 1; j < num; j++)
+		{
+			if (d[i] < d[j])
+			{
+				temp = d[i];
+				d[i] = d[j];
+				d[j] = temp;
+			}
+		}
+	return d[num / 2];
+
+}
+
+```
+
+![image-20240402212635333](./assets/AlgCode/image-20240402212635333.png)
+
+# 图像边缘提取
+
+```C++
+void CMFCApplication1View::sobel(BYTE* window, int wid, int hei, int* sob_x, int* sob_y)
+{
+	int so_x[9];//horizontal
+	so_x[0] = -1;
+	so_x[1] = 0;
+	so_x[2] = 1;
+	so_x[3] = -2;
+	so_x[4] = 0;
+	so_x[5] = 2;
+	so_x[6] = -1;
+	so_x[7] = 0;
+	so_x[8] = 1;
+
+	int so_y[9];
+	so_y[0] = -1;
+	so_y[1] = -2;
+	so_y[2] = -1;
+	so_y[3] = 0;
+	so_y[4] = 0;
+	so_y[5] = 0;
+	so_y[6] = 1;
+	so_y[7] = 2;
+	so_y[8] = 1;
+
+	int i, j, m, n;
+	BYTE block[9];
+
+	//求图像边缘
+	int value;
+	for(i=0;i<hei;i++)
+		for (j = 0; j < wid; j++) {
+			if (i == 0 || j == 0 || i == hei - 1 || j == wid - 1) {
+				sob_x[i * wid + j] = 0;
+				sob_y[i * wid + j] = 0;
+			}
+			else {
+				for (m = -1; m < 2; m++)
+					for (n = -1; n < 2; n++)
+						block[(m + 1) * 3 + n + 1] = window[(i + m) * wid + j + n];
+				value = convolution(so_x, block);
+				sob_x[i * wid + j] = value;
+
+				value = convolution(so_y, block);
+				sob_y[i * wid + j] = value;
+			}
+		}
+
+}
+
+```
+
+![image-20240402220356068](./assets/AlgCode/image-20240402220356068.png)
