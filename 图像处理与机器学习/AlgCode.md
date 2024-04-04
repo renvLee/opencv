@@ -258,3 +258,69 @@ void CMFCApplication1View::sobel(BYTE* window, int wid, int hei, int* sob_x, int
 ```
 
 ![image-20240402220356068](./assets/AlgCode/image-20240402220356068.png)
+
+# 腐蚀与膨胀
+
+```C++
+void CMFCApplication1View::erosion(BYTE* image, int w, int h, BYTE* outImg)
+{
+	int rept;
+	memcpy(image, outImg, sizeof(BYTE) * width * height);
+	//腐蚀
+	int i, j;
+	int m, n;
+	BYTE flag;
+	for (rept = 0; rept < 3; rept++) {
+		for (i = 1; i < h - 1; i++) {
+			for (j = 1; j < w - 1; j++) {
+				if (image[i * w + j] == 255) {//找到第一个图形点
+					flag = 0;
+					for (m = -1; m < 2; m++) {
+						for (n = -1; n < 2; n++) {
+							if (image[(i + m) * w + j + n] == 0) {
+								flag++;//3*3领域包含多个背景点
+								break;
+							}
+						}
+					}
+					if (flag > 2)
+						outImg[i * w + j] = 0;//则该图形点设为背景点
+				}
+			}
+		}
+	}
+	memcpy(image, outImg, sizeof(BYTE) * width * height);
+}
+
+void CMFCApplication1View::dilation(BYTE* image, int w, int h, BYTE* outImg)
+{
+	int rept;
+	//膨胀
+	memcpy(image, outImg, sizeof(BYTE) * width * height);
+	int i, j;
+	int m, n;
+	BYTE flag;
+	for (rept = 0; rept < 3; rept++) {
+		for (i = 1; i < h - 1; i++) {
+			for (j = 1; j < w - 1; j++) {
+				if (image[i * w + j] == 0) {//找到第一个图形背景点
+					flag = 0;
+					for (m = -1; m < 2; m++) {
+						for (n = -1; n < 2; n++) {
+							if (image[(i + m) * w + j + n] == 255) {
+								flag++;
+								break;
+							}
+						}
+					}
+					if (flag > 1)//领域包含2个或者2个以上的图形点
+						outImg[i * w + j] = 0;//则该图形点设为图形点
+				}
+			}
+		}
+		memcpy(image, outImg, sizeof(BYTE) * width * height);
+	}
+}
+
+```
+
