@@ -265,7 +265,7 @@ void CMFCApplication1View::sobel(BYTE* window, int wid, int hei, int* sob_x, int
 void CMFCApplication1View::erosion(BYTE* image, int w, int h, BYTE* outImg)
 {
 	int rept;
-	memcpy(image, outImg, sizeof(BYTE) * width * height);
+	memcpy(outImg, image, sizeof(BYTE) * width * height);
 	//腐蚀
 	int i, j;
 	int m, n;
@@ -296,7 +296,7 @@ void CMFCApplication1View::dilation(BYTE* image, int w, int h, BYTE* outImg)
 {
 	int rept;
 	//膨胀
-	memcpy(image, outImg, sizeof(BYTE) * width * height);
+	memcpy(outImg, image, sizeof(BYTE) * width * height);
 	int i, j;
 	int m, n;
 	BYTE flag;
@@ -309,18 +309,23 @@ void CMFCApplication1View::dilation(BYTE* image, int w, int h, BYTE* outImg)
 						for (n = -1; n < 2; n++) {
 							if (image[(i + m) * w + j + n] == 255) {
 								flag++;
-								break;
 							}
 						}
+						if (flag > 1)//领域包含2个或者2个以上的图形点
+							outImg[i * w + j] = 255;//则该图形点设为图形点
 					}
-					if (flag > 1)//领域包含2个或者2个以上的图形点
-						outImg[i * w + j] = 0;//则该图形点设为图形点
 				}
 			}
 		}
 		memcpy(image, outImg, sizeof(BYTE) * width * height);
 	}
 }
-
 ```
 
+![腐蚀](./assets/AlgCode/image-20240405154843572.png)
+
+![膨胀](./assets/AlgCode/image-20240405154849080.png)
+
+![开运算](./assets/AlgCode/image-20240405154857121.png)
+
+![闭运算](./assets/AlgCode/image-20240405154903710.png)
